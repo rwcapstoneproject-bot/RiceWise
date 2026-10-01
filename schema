@@ -1,0 +1,217 @@
+CREATE DATABASE IF NOT EXISTS `ricewise_db`
+  CHARACTER SET utf8mb4
+  COLLATE utf8mb4_unicode_ci;
+
+USE `ricewise_db`;
+
+CREATE TABLE IF NOT EXISTS `users` (
+  `id`            INT(11)        NOT NULL AUTO_INCREMENT,
+  `name`          VARCHAR(100)   NOT NULL COLLATE utf8mb4_general_ci,
+  `username`      VARCHAR(60)    DEFAULT NULL COLLATE utf8mb4_general_ci,
+  `email`         VARCHAR(150)   NOT NULL COLLATE utf8mb4_general_ci,
+  `password_hash` VARCHAR(255)   NOT NULL COLLATE utf8mb4_general_ci,
+  `location`      VARCHAR(150)   DEFAULT NULL COLLATE utf8mb4_general_ci,
+  `role`          ENUM('user','admin') NOT NULL DEFAULT 'user' COLLATE utf8mb4_general_ci,
+  `is_blocked`    TINYINT(1)     NOT NULL DEFAULT 0,
+  `profile_pic`   VARCHAR(255)   DEFAULT NULL COLLATE utf8mb4_general_ci,
+  `hectares`      DECIMAL(10,2)  NOT NULL DEFAULT 1.00,
+  `created_at`    TIMESTAMP      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at`    TIMESTAMP      NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `email` (`email`),
+  UNIQUE KEY `username` (`username`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- Password hashes left untouched, as-is from the original seed.
+INSERT INTO `users` (`id`, `name`, `username`, `email`, `password_hash`, `location`, `role`, `is_blocked`, `profile_pic`, `hectares`) VALUES
+(1, 'Administrator', 'admin',      'admin@ricewise.com.ph', '$2b$12$RQDMfobyBTBUJNp9WttYMOjDyKfMqbKoKUCThiE/q2V...', 'RiceWise HQ',                  'admin', 0, NULL, 1.00),
+(2, 'Test Farmer',   'testfarmer', 'test@ricewise.com.ph',  '$2b$12$3KtR2MX62hU4a.QwZUOI2u2xc2f1iCinBBD1d1GlKQc...', 'Dumaguete, Negros Oriental',   'user',  0, NULL, 2.50);
+
+CREATE TABLE IF NOT EXISTS `farm_records` (
+  `id`          INT(11)       NOT NULL AUTO_INCREMENT,
+  `user_id`     INT(11)       NOT NULL,
+  `activity`    VARCHAR(100)  NOT NULL COLLATE utf8mb4_general_ci,
+  `crop_type`   VARCHAR(50)   DEFAULT NULL COLLATE utf8mb4_general_ci,
+  `location`    VARCHAR(150)  DEFAULT NULL COLLATE utf8mb4_general_ci,
+  `quantity`    DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+  `unit`        ENUM('peso','kg') NOT NULL DEFAULT 'peso' COLLATE utf8mb4_general_ci,
+  `status`      ENUM('Completed','In Progress','Pending') NOT NULL DEFAULT 'Pending' COLLATE utf8mb4_general_ci,
+  `record_date` DATE          NOT NULL,
+  `notes`       TEXT          DEFAULT NULL COLLATE utf8mb4_general_ci,
+  `created_at`  TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `user_id` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- Full demo dataset: 5 fields, real crop cycles, Jan-Jul 2026.
+INSERT INTO `farm_records` (`user_id`, `activity`, `crop_type`, `location`, `quantity`, `unit`, `status`, `record_date`) VALUES
+(2, 'Planting', 'NSIC Rc222', 'Field A-1', 3200, 'peso', 'Completed', '2026-01-10'),
+(2, 'Planting', 'IR64', 'Field B-2', 3100, 'peso', 'Completed', '2026-01-15'),
+(2, 'Fertilizing', NULL, 'Field A-1', 2800, 'peso', 'Completed', '2026-01-25'),
+(2, 'Fertilizing', NULL, 'Field B-2', 2600, 'peso', 'Completed', '2026-01-28'),
+(2, 'Planting', 'Sinandomeng', 'Field C-3', 3000, 'peso', 'Completed', '2026-02-05'),
+(2, 'Irrigation', NULL, 'Field A-1', 1200, 'peso', 'Completed', '2026-02-10'),
+(2, 'Irrigation', NULL, 'Field B-2', 1100, 'peso', 'Completed', '2026-02-12'),
+(2, 'Pest Control', NULL, 'Field A-1', 1500, 'peso', 'Completed', '2026-02-20'),
+(2, 'Fertilizing', NULL, 'Field C-3', 2500, 'peso', 'Completed', '2026-02-20'),
+(2, 'Pest Control', NULL, 'Field B-2', 1400, 'peso', 'Completed', '2026-02-25'),
+(2, 'Planting', 'PSB Rc18', 'Field D-1', 3150, 'peso', 'Completed', '2026-03-01'),
+(2, 'Irrigation', NULL, 'Field C-3', 1150, 'peso', 'Completed', '2026-03-05'),
+(2, 'Harvesting', NULL, 'Field A-1', 1450, 'kg', 'Completed', '2026-03-15'),
+(2, 'Pest Control', NULL, 'Field C-3', 1350, 'peso', 'Completed', '2026-03-18'),
+(2, 'Fertilizing', NULL, 'Field D-1', 2650, 'peso', 'Completed', '2026-03-18'),
+(2, 'Sales', NULL, 'Field A-1', 42050, 'peso', 'Completed', '2026-03-20'),
+(2, 'Harvesting', NULL, 'Field B-2', 1600, 'kg', 'Completed', '2026-03-22'),
+(2, 'Sales', NULL, 'Field B-2', 46400, 'peso', 'Completed', '2026-03-28'),
+(2, 'Irrigation', NULL, 'Field D-1', 1180, 'peso', 'Completed', '2026-04-02'),
+(2, 'Planting', 'Dinorado', 'Field B-2', 3300, 'peso', 'Completed', '2026-04-10'),
+(2, 'Pest Control', NULL, 'Field D-1', 1420, 'peso', 'Completed', '2026-04-15'),
+(2, 'Harvesting', NULL, 'Field C-3', 1380, 'kg', 'Completed', '2026-04-20'),
+(2, 'Fertilizing', NULL, 'Field B-2', 2750, 'peso', 'Completed', '2026-04-25'),
+(2, 'Sales', NULL, 'Field C-3', 40020, 'peso', 'Completed', '2026-04-26'),
+(2, 'Planting', 'NSIC Rc222', 'Field A-1', 3400, 'peso', 'Completed', '2026-05-05'),
+(2, 'Irrigation', NULL, 'Field B-2', 1250, 'peso', 'Completed', '2026-05-10'),
+(2, 'Harvesting', NULL, 'Field D-1', 1420, 'kg', 'Completed', '2026-05-10'),
+(2, 'Sales', NULL, 'Field D-1', 41180, 'peso', 'Completed', '2026-05-16'),
+(2, 'Fertilizing', NULL, 'Field A-1', 2900, 'peso', 'Completed', '2026-05-20'),
+(2, 'Pest Control', NULL, 'Field B-2', 1550, 'peso', 'Completed', '2026-05-20'),
+(2, 'Planting', 'Milagrosa', 'Field E-2', 2000, 'peso', 'Completed', '2026-05-25'),
+(2, 'Irrigation', NULL, 'Field A-1', 1300, 'peso', 'Completed', '2026-06-05'),
+(2, 'Fertilizing', NULL, 'Field E-2', 1600, 'peso', 'Completed', '2026-06-08'),
+(2, 'Pest Control', NULL, 'Field A-1', 1600, 'peso', 'Completed', '2026-06-15'),
+(2, 'Harvesting', NULL, 'Field B-2', 1500, 'kg', 'Completed', '2026-06-18'),
+(2, 'Irrigation', NULL, 'Field E-2', 700, 'peso', 'Completed', '2026-06-20'),
+(2, 'Sales', NULL, 'Field B-2', 45000, 'peso', 'Completed', '2026-06-25'),
+(2, 'Irrigation', NULL, 'Field A-1', 700, 'peso', 'In Progress', '2026-07-01'),
+(2, 'Pest Control', NULL, 'Field E-2', 900, 'peso', 'In Progress', '2026-07-02');
+
+CREATE TABLE IF NOT EXISTS `calendar_events` (
+  `id`          INT(11)      NOT NULL AUTO_INCREMENT,
+  `user_id`     INT(11)      NOT NULL,
+  `title`       VARCHAR(200) NOT NULL COLLATE utf8mb4_general_ci,
+  `event_date`  DATE         NOT NULL,
+  `description` TEXT         DEFAULT NULL COLLATE utf8mb4_general_ci,
+  `color`       VARCHAR(20)  DEFAULT '#4a7a42' COLLATE utf8mb4_general_ci,
+  `created_at`  TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `user_id` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+INSERT INTO `calendar_events` (`user_id`, `title`, `event_date`, `description`, `color`) VALUES
+(2, 'Scout for stem borer - Field A-1', '2026-07-10', 'Check for deadhearts in the new planting.', '#5a7a52'),
+(2, 'Apply 2nd fertilizer round - Field E-2', '2026-07-15', 'Top-dress nitrogen before panicle initiation.', '#c8963e'),
+(2, 'Order certified seeds for next cycle', '2026-07-25', 'Reserve NSIC Rc222 seeds for Field C-3 replanting.', '#4a90d9'),
+(2, 'Estimated harvest - Field E-2', '2026-08-20', 'Grains should be 80-85% golden by this date.', '#3d5c38');
+
+CREATE TABLE IF NOT EXISTS `notifications` (
+  `id`          INT(11)      NOT NULL AUTO_INCREMENT,
+  `user_id`     INT(11)      NOT NULL,
+  `title`       VARCHAR(200) NOT NULL COLLATE utf8mb4_general_ci,
+  `description` TEXT         DEFAULT NULL COLLATE utf8mb4_general_ci,
+  `status`      ENUM('unread','read') NOT NULL DEFAULT 'unread' COLLATE utf8mb4_general_ci,
+  `starred`     TINYINT(1)   NOT NULL DEFAULT 0,
+  -- Extended to include 'pest' and 'water': the bell-dropdown icon function
+  -- (bellNotifIcon, used on dashboard/records/reports/notifications) already
+  -- had icons for these two types, but the original ENUM didn't allow them.
+  `type`        ENUM('plant','weather','reminder','harvest','pest','water','system') NOT NULL DEFAULT 'system' COLLATE utf8mb4_general_ci,
+  `notif_date`  DATE         DEFAULT NULL,
+  `created_at`  TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `user_id` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+INSERT INTO `notifications` (`user_id`, `title`, `description`, `status`, `starred`, `type`, `notif_date`) VALUES
+(2, 'Time to Plant', 'Starting this day until.', 'unread', 0, 'plant', '2026-01-10'),
+(2, 'Weather Alert', 'Rain expected tomorrow.', 'unread', 0, 'weather', '2026-06-19'),
+(2, 'Harvest Logged', 'Field B-2 harvest of 1,500 kg recorded and marked completed.', 'read', 0, 'harvest', '2026-06-18'),
+(2, 'Sale Recorded', 'Sold Field B-2 harvest for PHP 45,000.', 'read', 0, 'system', '2026-06-25'),
+(2, 'Irrigation Reminder', 'Field A-1 irrigation cycle started - monitor water levels over the next 3 days.', 'unread', 0, 'water', '2026-07-01'),
+(2, 'Pest Control In Progress', 'Pest Control on Field E-2 is currently in progress.', 'unread', 1, 'pest', '2026-07-02'),
+(2, 'Upcoming Task', 'Second fertilizer round for Field E-2 is due July 15.', 'unread', 0, 'reminder', '2026-07-08');
+
+
+
+
+
+------------------------------------------------------
+
+USE `ricewise_db`;
+
+ALTER TABLE `calendar_events`
+  ADD COLUMN `event_time` TIME NOT NULL DEFAULT '08:00:00' AFTER `event_date`,
+  ADD COLUMN `category` ENUM('planting','harvest','irrigation','pest','fertilize','other')
+              NOT NULL DEFAULT 'other' AFTER `description`,
+  ADD COLUMN `reminder_type` ENUM('same-day','1-day','1-week')
+              NOT NULL DEFAULT 'same-day' AFTER `category`;
+
+UPDATE `calendar_events` SET `category` = 'fertilize', `color` = '#7b5ea7' WHERE `title` LIKE '%fertilizer%';
+UPDATE `calendar_events` SET `category` = 'pest',       `color` = '#c0392b' WHERE `title` LIKE '%stem borer%' OR `title` LIKE '%pest%';
+UPDATE `calendar_events` SET `category` = 'other',      `color` = '#5a7a52' WHERE `title` LIKE '%seed%';
+UPDATE `calendar_events` SET `category` = 'harvest',    `color` = '#c8963e' WHERE `title` LIKE '%harvest%';
+
+
+
+
+
+-- ============================================================
+
+USE `ricewise_db`;
+
+CREATE TABLE IF NOT EXISTS `planting_cycles` (
+  `id`             INT(11)       NOT NULL AUTO_INCREMENT,
+  `user_id`        INT(11)       NOT NULL,
+  `field_location` VARCHAR(150)  NOT NULL COLLATE utf8mb4_general_ci,
+  `crop_type`      VARCHAR(50)   DEFAULT NULL COLLATE utf8mb4_general_ci,
+  `start_date`     DATE          NOT NULL,
+  `status`         ENUM('active','completed') NOT NULL DEFAULT 'active' COLLATE utf8mb4_general_ci,
+  `completed_at`   TIMESTAMP     NULL DEFAULT NULL,
+  `created_at`     TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `user_id` (`user_id`),
+  KEY `user_status` (`user_id`, `status`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+CREATE TABLE IF NOT EXISTS `planting_process_completed` (
+  `id`            INT(11)   NOT NULL AUTO_INCREMENT,
+  `user_id`       INT(11)   NOT NULL,
+  `cycle_id`      INT(11)   NOT NULL,
+  `step_index`    TINYINT   NOT NULL,
+  `completed_at`  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `cycle_step` (`cycle_id`, `step_index`),
+  KEY `user_id` (`user_id`),
+  KEY `cycle_id` (`cycle_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+
+
+
+
+
+-- ============================================================
+
+USE `ricewise_db`;
+
+CREATE TABLE IF NOT EXISTS `password_resets` (
+  `id`          INT(11)      NOT NULL AUTO_INCREMENT,
+  `user_id`     INT(11)      NOT NULL,
+  `token_hash`  VARCHAR(64)  NOT NULL COLLATE utf8mb4_general_ci, -- sha256 hex digest of the raw token
+  `expires_at`  DATETIME     NOT NULL,
+  `used`        TINYINT(1)   NOT NULL DEFAULT 0,
+  `created_at`  TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `user_id` (`user_id`),
+  KEY `token_hash` (`token_hash`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- ============================================================
+
+USE `ricewise_db`;
+
+UPDATE users
+SET password_hash = '$2y$12$4QYGyyKmIV5sqoT1dR6Q9e8QWJQm1syGUNHIye.PzRTCWY5AZqgMe'
+WHERE username = 'admin';
+
+UPDATE users
+SET password_hash = '$2y$12$hco4QIaKpS0d7nkqtG/lQOA1le5pG3TGiAyUf.jnZhQBrLL3pTI9K'
+WHERE username = 'testfarmer';
